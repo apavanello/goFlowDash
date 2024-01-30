@@ -1,0 +1,10 @@
+{"_id":"1","source":"1","target":"2"}
+{"_id":"2","source":"1","target":"3"}
+{"_id":"3","source":"1","target":"4"}
+{"_id":"4","source":"2","target":"5"}
+{"_id":"5","source":"3","target":"6"}
+{"_id":"6","source":"4","target":"8"}
+{"_id":"7","source":"6","target":"8"}
+{"_id":"8","source":"5","target":"7"}
+{"_id":"9","source":"7","target":"9"}
+{"_id":"10","source":"8","target":"9"}
