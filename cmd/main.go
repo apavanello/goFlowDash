@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"github.com/apavanello/goflowdash/assets"
 	"github.com/apavanello/goflowdash/pkg/diagram"
 	"github.com/apavanello/goflowdash/pkg/mongodb"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
+	"io/fs"
 	"log"
 	"net/http"
 	"time"
@@ -34,7 +36,25 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	r.GET("/ping", func(c *gin.Context) {
+	distFS, err := fs.Sub(assets.Dist, "dist")
+	if err != nil {
+		panic(err)
+	}
+
+	assetsFS, err := fs.Sub(assets.Dist, "dist/assets")
+	if err != nil {
+		panic(err)
+	}
+
+	//r.NoRoute(gin.WrapH(http.FileServer(http.FS(dist))))
+
+	r.StaticFS("/assets", http.FS(assetsFS))
+
+	r.Any("/", func(c *gin.Context) {
+		c.FileFromFS("./", http.FS(distFS))
+	})
+
+	r.GET("/api/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
@@ -118,7 +138,7 @@ func main() {
 		}
 	})
 
-	err := r.Run(":8082")
+	err = r.Run(":8082")
 	if err != nil {
 		panic(err)
 	}

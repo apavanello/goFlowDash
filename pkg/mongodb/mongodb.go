@@ -2,13 +2,18 @@ package mongodb
 
 import (
 	"context"
+	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"os"
 )
 
 func Connect(ctx context.Context) (*mongo.Client, error) {
-	mongoURL := "mongodb://root:example@127.0.0.1:27017"
+	// get mongouri from env
+	mongoURL := os.Getenv("MONGO_URI")
+	fmt.Println("mongoURL: ", mongoURL)
+	//mongoURL := "mongodb://root:example@127.0.0.1:27017"
 	// Set client options
 	clientOptions := options.Client().ApplyURI(mongoURL)
 
