@@ -47,7 +47,7 @@ func main() {
 
 	r.StaticFS("/assets", http.FS(assetsFS))
 
-	r.GET("/", func(c *gin.Context) {
+	r.Any("/", func(c *gin.Context) {
 		c.FileFromFS("./", http.FS(distFS))
 	})
 
