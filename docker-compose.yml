@@ -22,7 +22,10 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
 
   app:
-    build: .
+    build:
+        context: .
+        dockerfile: Dockerfile-dev
+        no_cache: true
     restart: always
     ports:
       - 8082:8082

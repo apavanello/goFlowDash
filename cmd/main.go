@@ -24,7 +24,6 @@ func main() {
 
 	load()
 	defer mongodbClient.Disconnect(ctx)
-	//mongodb.Ping()
 
 	r := gin.Default()
 
@@ -46,11 +45,9 @@ func main() {
 		panic(err)
 	}
 
-	//r.NoRoute(gin.WrapH(http.FileServer(http.FS(dist))))
-
 	r.StaticFS("/assets", http.FS(assetsFS))
 
-	r.Any("/", func(c *gin.Context) {
+	r.GET("/", func(c *gin.Context) {
 		c.FileFromFS("./", http.FS(distFS))
 	})
 
@@ -63,21 +60,21 @@ func main() {
 	r.GET("/api/:object/list", func(c *gin.Context) {
 
 		switch c.Param("object") {
-		case "box":
-			var box diagram.Box
-			boxes, err := box.List(mongodbClient)
-			log.Default().Println(boxes)
+		case "node":
+			var node diagram.Node
+			nodes, err := node.List(mongodbClient)
+			log.Default().Println(nodes)
 			if err != nil {
 				c.JSON(500, err)
 			}
-			c.JSON(200, boxes)
+			c.JSON(200, nodes)
 		case "edge":
 			var edge diagram.Edge
-			boxes, err := edge.List(mongodbClient)
+			nodes, err := edge.List(mongodbClient)
 			if err != nil {
 				c.JSON(500, err)
 			}
-			c.JSON(200, boxes)
+			c.JSON(200, nodes)
 		default:
 			c.JSON(404, gin.H{"error": "not found"})
 		}
@@ -86,16 +83,16 @@ func main() {
 	r.POST("/api/:object/new", func(c *gin.Context) {
 
 		switch c.Param("object") {
-		case "box":
-			var box diagram.Box
-			err := c.ShouldBindJSON(&box)
+		case "node":
+			var node diagram.Node
+			err := c.ShouldBindJSON(&node)
 
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
-			log.Println(box)
-			res, err := box.New(mongodbClient)
+			log.Println(node)
+			res, err := node.New(mongodbClient)
 			if err != nil {
 				c.JSON(500, err)
 			}
@@ -123,19 +120,35 @@ func main() {
 
 		if c.GetHeader("Update-Type") == "status" {
 
-			var boxStatus diagram.BoxStatus
+			var nodeStatus diagram.NodeStatus
 
-			err := c.ShouldBindJSON(&boxStatus)
+			err := c.ShouldBindJSON(&nodeStatus)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			}
-			status, err := boxStatus.UpdateStatus(mongodbClient)
+			status, err := nodeStatus.UpdateStatus(mongodbClient)
 			if err != nil {
 				c.JSON(500, err)
 			}
 			c.JSON(200, gin.H{"result": status.ModifiedCount})
 
 		}
+	})
+
+	r.POST("/api/save", func(c *gin.Context) {
+
+		var panel diagram.Panel
+
+		err := c.ShouldBindJSON(&panel)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+
+		err = panel.Save(mongodbClient)
+		if err != nil {
+			c.JSON(500, err)
+		}
+		c.JSON(200, gin.H{"result": "ok"})
 	})
 
 	err = r.Run(":8082")

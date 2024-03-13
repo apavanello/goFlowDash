@@ -10,21 +10,18 @@ import (
 )
 
 func Connect(ctx context.Context) (*mongo.Client, error) {
-	// get mongouri from env
+
 	mongoURL := os.Getenv("MONGO_URI")
 	fmt.Println("mongoURL: ", mongoURL)
-	//mongoURL := "mongodb://root:example@127.0.0.1:27017"
-	// Set client options
+
 	clientOptions := options.Client().ApplyURI(mongoURL)
 
-	// Connect to MongoDB
 	client, err := mongo.Connect(ctx, clientOptions)
 
 	if err != nil {
 		return nil, err
 	}
 
-	// Check the connection
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
 		return nil, err
