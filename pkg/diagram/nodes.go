@@ -2,11 +2,12 @@ package diagram
 
 import (
 	"context"
+	"log"
+	"time"
+
 	"github.com/apavanello/goflowdash/pkg/mongodb"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
-	"time"
 )
 
 type Node struct {
@@ -17,11 +18,16 @@ type Node struct {
 		X float64 `bson:"x" json:"x"`
 		Y float64 `bson:"y" json:"y"`
 	} `bson:"position" json:"position"`
-	Extras struct {
-		Status      string `bson:"status" json:"status"`
-		Description string `bson:"description" json:"description"`
-		Repo        string `bson:"repo" json:"repo"`
-	} `bson:"extras" json:"extras"`
+	Data struct {
+		Status          string `bson:"status" json:"status"`
+		Description     string `bson:"description" json:"description"`
+		Repo            string `bson:"repo" json:"repo"`
+		StartTime       string `bson:"startTime" json:"startTime"`
+		EndTime         string `bson:"endTime" json:"endTime"`
+		PlanedStartTime string `bson:"planedStartTime" json:"planedStartTime"`
+		PlanedEndTime   string `bson:"planedEndTime" json:"planedEndTime"`
+		Squad           string `bson:"squad" json:"squad"`
+	} `bson:"data" json:"data"`
 }
 
 type NodeStatus struct {
@@ -91,7 +97,10 @@ func (n *Node) SavePos(client *mongo.Client) error {
 		ctx,
 		bson.M{"_id": n.Id},
 		bson.D{
-			{"$set", bson.D{{"position.x", n.Position.X}, {"position.y", n.Position.Y}}},
+			{"$set", bson.D{
+				{Key: "position.x", Value: n.Position.X},
+				{Key: "position.y", Value: n.Position.Y},
+			}},
 		},
 	)
 	if err != nil {
@@ -112,7 +121,7 @@ func (ns *NodeStatus) UpdateStatus(c *mongo.Client) (*mongo.UpdateResult, error)
 		ctx,
 		bson.M{"_id": ns.Id},
 		bson.D{
-			{"$set", bson.D{{"extras.status", ns.Status}}},
+			{"$set", bson.D{{Key: "data.status", Value: ns.Status}}},
 		},
 	)
 	if err != nil {
