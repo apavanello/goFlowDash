@@ -2,16 +2,17 @@ package main
 
 import (
 	"context"
+	"io/fs"
+	"log"
+	"net/http"
+	"time"
+
 	"github.com/apavanello/goflowdash/assets"
 	"github.com/apavanello/goflowdash/pkg/diagram"
 	"github.com/apavanello/goflowdash/pkg/mongodb"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
-	"io/fs"
-	"log"
-	"net/http"
-	"time"
 )
 
 var (
@@ -151,7 +152,11 @@ func main() {
 		c.JSON(200, gin.H{"result": "ok"})
 	})
 
-	err = r.Run(":8082")
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"result": "ok"})
+	})
+
+	err = r.Run(":8080")
 	if err != nil {
 		panic(err)
 	}
