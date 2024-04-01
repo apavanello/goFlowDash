@@ -2,13 +2,16 @@ package diagram
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/apavanello/goflowdash/pkg/mongodb"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+type NodeDelete struct {
+	Id string `bson:"_id,omitempty" json:"id" binding:"required"`
+}
 
 type Node struct {
 	Id       string `bson:"_id,omitempty" json:"id" binding:"required"`
@@ -46,8 +49,6 @@ func (n *Node) List(c *mongo.Client) ([]Node, error) {
 
 	cursor, err := col.Find(ctx, bson.D{})
 
-	log.Default().Println(cursor)
-
 	if err != nil {
 		return nil, err
 	}
@@ -55,9 +56,6 @@ func (n *Node) List(c *mongo.Client) ([]Node, error) {
 	defer cursor.Close(ctx)
 
 	var nodes []Node
-
-	m := make(map[int]int)
-
 	for cursor.Next(ctx) {
 		err := cursor.Decode(&n)
 		if err != nil {
@@ -65,8 +63,6 @@ func (n *Node) List(c *mongo.Client) ([]Node, error) {
 		}
 		nodes = append(nodes, *n)
 	}
-
-	log.Default().Println(m)
 
 	return nodes, nil
 }
@@ -108,6 +104,21 @@ func (n *Node) SavePos(client *mongo.Client) error {
 	}
 
 	return nil
+}
+
+func (nd *NodeDelete) Delete(client *mongo.Client) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	col := mongodb.GetCollection(client, "nodes")
+
+	_, err := col.DeleteOne(ctx, bson.M{"_id": nd.Id})
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }
 
 func (ns *NodeStatus) UpdateStatus(c *mongo.Client) (*mongo.UpdateResult, error) {
