@@ -4,20 +4,23 @@ import { onBeforeMount,onMounted, ref} from 'vue'
 import {Background} from '@vue-flow/background'
 import { ControlButton, Controls } from '@vue-flow/controls'
 import {MiniMap} from '@vue-flow/minimap'
-import {useVueFlow, VueFlow, type FlowExportObject} from '@vue-flow/core'
+import {useVueFlow, VueFlow, type FlowExportObject, type Edge} from '@vue-flow/core'
 import {nodes, getNodes} from './components/Nodes.ts'
-import {edges, getEdges} from './components/Edges.ts'
+import {createEdge, edges, getEdges, renderEdges} from './components/Edges.ts'
 import axios from "axios";
 import Icon from './components/Icon.vue'
 import CustomNode from './components/CustomNode.vue'
 import CustomNodeContextMenu from './components/CustomNodeContextMenu.vue'
 import CustomPaneContextMenu from "./components/CustomPaneContextMenu.vue";
+import CustomEdgeContextMenu from "./components/CustomEdgeContextMenu.vue";
 import { savePanel } from './components/Panel.ts'
 
-const { onConnect, addEdges, onNodeClick, onNodeContextMenu, onPaneContextMenu, toObject} = useVueFlow()
+
+const { onConnect, addEdges,onNodeContextMenu, onPaneContextMenu, onEdgeContextMenu, toObject} = useVueFlow()
 
 const dark = ref(false)
 const customPaneContextMenu = ref(CustomPaneContextMenu)
+const customEdgeContextMenu = ref(CustomEdgeContextMenu)
 const customNodeContextMenu = ref(CustomNodeContextMenu)
 let panelObjects = {} as FlowExportObject
 
@@ -36,14 +39,6 @@ onMounted(() => {
   getEdges();
 });
 
-onConnect((params) => {
-  addEdges([params])
-})
-
-onNodeClick((node) => {
-  customNodeContextMenu.value.ShowNodeContextMenu(node);
-})
-
 onNodeContextMenu((node) => {
   customNodeContextMenu.value.ShowNodeContextMenu(node);
 })
@@ -54,20 +49,29 @@ onPaneContextMenu((e) => {
   customPaneContextMenu.value.onContextMenu(e, panelObjects)
 })
 
+
+onEdgeContextMenu((e) => {
+  customEdgeContextMenu.value.ShowEdgeContextMenu(e)
+})
+
+onConnect((params) => {
+  const newEdge: Edge = createEdge(params)
+  addEdges([newEdge])
+})
+
 function logToObject() {
   console.log(toObject())
 }
 
 function toggleDarkMode() {
   dark.value = !dark.value
-}
 
+}
 
 async function onSave() {
   panelObjects = toObject()
   savePanel(panelObjects)
 }
-
 
 </script>
 
@@ -82,9 +86,10 @@ async function onSave() {
         :default-zoom="1.5"
         :min-zoom="0.2"
         :max-zoom="4"
+
     >
 
-
+      <Edge v-if="renderEdges"/>
       <template #node-custom="customNodeProps">
         <CustomNode v-bind="customNodeProps"  class=".vue-flow__node-default"/>
       </template>
@@ -109,5 +114,6 @@ async function onSave() {
 
     <CustomPaneContextMenu ref="customPaneContextMenu"/>
     <CustomNodeContextMenu ref="customNodeContextMenu"/>
+    <CustomEdgeContextMenu ref="customEdgeContextMenu"/>
   </div>
 </template>

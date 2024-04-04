@@ -133,45 +133,72 @@ func main() {
 
 	r.POST("/api/:object/update", func(c *gin.Context) {
 
-		if c.GetHeader("Update-Type") == "status" {
+		switch c.Param("object") {
+		case "node":
+			if c.GetHeader("Update-Type") == "status" {
 
-			var nodeStatus diagram.NodeStatus
+				var nodeStatus diagram.NodeStatus
 
-			err := c.ShouldBindJSON(&nodeStatus)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			}
-
-			status, err := nodeStatus.UpdateStatus(mongodbClient)
-			if err != nil {
-				c.JSON(500, err)
-			}
-
-			c.JSON(200, gin.H{"result": status.ModifiedCount})
-		}
-
-		if c.GetHeader("Update-Type") == "edge-flow" {
-
-			var edgeFlow diagram.EdgeFlow
-			var status *mongo.UpdateResult
-			var err error
-
-			err = c.ShouldBindJSON(&edgeFlow)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			}
-
-			if c.GetHeader("Flow-Type") == "serial" || c.GetHeader("Flow-Type") == "parallel" {
-				status, err = edgeFlow.Update(mongodbClient, c.GetHeader("Flow-Type"))
+				err := c.ShouldBindJSON(&nodeStatus)
 				if err != nil {
-					log.Default().Println(err)
-					c.JSON(400, err)
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				}
+
+				status, err := nodeStatus.UpdateStatus(mongodbClient)
+				if err != nil {
+					c.JSON(500, err)
+				}
+
+				c.JSON(200, gin.H{"result": status.ModifiedCount})
+
+			} else if c.GetHeader("Update-Type") == "full" {
+
+				var node diagram.Node
+
+				err := c.ShouldBindJSON(&node)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				}
+
+				status, err := node.Update(mongodbClient)
+
+				if err != nil {
+					c.JSON(500, err)
+				}
+				c.JSON(200, gin.H{"result": status.ModifiedCount})
+
 			} else {
 				c.JSON(400, "Flow-Type not supported")
 			}
 
-			c.JSON(200, gin.H{"result": status.ModifiedCount})
+		case "edge":
+			if c.GetHeader("Update-Type") == "edge-flow" {
+
+				var edgeFlow diagram.EdgeFlow
+				var status *mongo.UpdateResult
+				var err error
+
+				err = c.ShouldBindJSON(&edgeFlow)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				}
+
+				if c.GetHeader("Flow-Type") == "serial" || c.GetHeader("Flow-Type") == "parallel" {
+					status, err = edgeFlow.Update(mongodbClient, c.GetHeader("Flow-Type"))
+					if err != nil {
+						log.Default().Println(err)
+						c.JSON(400, err)
+					}
+
+				} else {
+					c.JSON(400, "Flow-Type not supported")
+				}
+
+				c.JSON(200, gin.H{"result": status.ModifiedCount})
+			}
+
+		default:
+			c.JSON(404, gin.H{"error": "not found"})
 		}
 	})
 
@@ -246,6 +273,7 @@ func main() {
 	})
 
 	err = r.Run(":8080")
+
 	if err != nil {
 		panic(err)
 	}

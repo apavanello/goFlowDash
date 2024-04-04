@@ -141,3 +141,18 @@ func (ns *NodeStatus) UpdateStatus(c *mongo.Client) (*mongo.UpdateResult, error)
 
 	return res, nil
 }
+
+func (n *Node) Update(c *mongo.Client) (*mongo.UpdateResult, error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	col := mongodb.GetCollection(c, "nodes")
+
+	res, err := col.ReplaceOne(ctx, bson.D{{"_id", n.Id}}, n)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}

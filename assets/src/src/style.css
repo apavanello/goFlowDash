@@ -45,8 +45,9 @@
 .vue-flow__node-custom {
     padding: 10px;
     border-radius: 3px;
-    width: 150px;
-    font-size: 12px;
+    min-width: 300px;
+    max-width: 300px;
+    font-size: 8px;
     text-align: center;
     border-width: 1px;
     border-style: solid;
@@ -55,9 +56,18 @@
     border-color: var(--vf-node-color);
 }
 
+.details-text {
+    width: fit-content;
+}
+
 .node-stop {
-  background-color: #ff4d4d;
+  background-color: #ababab;
   color: #fff;
+}
+
+.node-pause {
+    background-color: #ff4d4d;
+    color: #fff;
 }
 
 .node-done {
@@ -74,6 +84,18 @@
    animation-timing-function: linear;
  }
 
+.chip-red {
+    color: red;
+}
+
+.chip-green {
+    color: green;
+}
+
+.chip-blue {
+    color: blue;
+}
+
 @keyframes gradient {
   0%   { background-position: 0 0; }
   100% { background-position: -200% 0; }
@@ -86,3 +108,11 @@
   transform: translateX(-100%);
   margin-left: -15px;
 }
+
+.time-cols {
+    padding: 1px;
+}
+.time-chips {
+
+}
+

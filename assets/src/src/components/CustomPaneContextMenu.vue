@@ -1,10 +1,13 @@
 <script lang="ts" setup>
-import {ref} from 'vue';
+import {ref, getCurrentInstance} from 'vue';
 import {ContextMenu, ContextMenuItem} from '@imengyu/vue3-context-menu'
-import { onAddNode } from './Nodes.ts'
+import {getNodes, onAddNode} from './Nodes.ts'
 import {type NewNode} from './CustomTypes.ts'
 import {savePanel} from "./Panel.ts";
 import {FlowExportObject} from "@vue-flow/core";
+import CustomDialog from "./CustomDialog.vue";
+import {getEdges} from "./Edges.ts";
+
 
 const show = ref(false);
 const options = ref({
@@ -32,26 +35,50 @@ defineExpose({
 })
 
 const dialog = ref(false)
-const label = ref('')
-const description = ref('')
-const repo = ref('')
 
-
-function onSaveDialog() {
+function onSaveDialog(data: any) {
   const newNode = {
-    label: label.value,
-    description: description.value,
-    repo: repo.value
+    label: data.label,
+    description: data.description,
+    repo: data.repo,
+    Squad: data.squad,
+    StartTime: data.startTime,
+    EndTime: data.endTime,
+    PlanedStartTime: data.pStartTime,
+    PlanedEndTime: data.pEndTime,
   } as NewNode
+  console.log(newNode)
+
   const ePos = {x: options.value.x, y: options.value.y} as MouseEvent
-  console.log('x', ePos.x, 'y', ePos.y)
+
   onAddNode(ePos, newNode)
+  refresh()
+  dialog.value = false
+}
+
+function onCloseDialog() {
+  console.log('onCloseDialog')
   dialog.value = false
 }
 
 async function onSave() {
   console.log('onSave', panelObjects)
   await savePanel(panelObjects)
+}
+
+function showDialog() {
+  dialog.value = true
+  console.log('showDialog', CustomDialog.dialog)
+}
+
+function refresh() {
+
+  getNodes()
+  getEdges()
+  const instance = getCurrentInstance();
+  instance?.proxy?.$forceUpdate();
+
+  console.log('refresh')
 }
 
 </script>
@@ -62,75 +89,15 @@ async function onSave() {
       v-model:show="show"
       :options="options"
   >
-    <context-menu-item label="Novo Node" @click="dialog = true"/>
+    <context-menu-item label="Novo Node" @click="showDialog"/>
     <context-menu-sperator/>
     <context-menu-item label="Salvar" @click="onSave"/>
   </context-menu>
-
-
-  <v-dialog
-      v-model="dialog"
-      width="800"
+  <CustomDialog
+      v-model:dialog="dialog"
+      @onSaveDialog="onSaveDialog($event)"
+      @onCloseDialog="onCloseDialog"
   >
-    <v-card
-        prepend-icon="mdi-account"
-        title="User Profile"
-    >
-      <v-card-text>
-        <v-row dense>
-          <v-col
-              cols="12"
-              sm="12"
-          >
-            <v-text-field
-                label="Node Label*"
-                v-model="label"
-                required
-            ></v-text-field>
-          </v-col>
-          <v-col
-              cols="12"
-              sm="12"
-          >
-            <v-text-field
-                label="Descrição"
-                v-model="description"
-            ></v-text-field>
-          </v-col>
 
-          <v-col
-              cols="12"
-              sm="12"
-          >
-            <v-text-field
-                label="Repositorio"
-                v-model="repo"
-            ></v-text-field>
-          </v-col>
-        </v-row>
-
-        <small class="text-caption text-medium-emphasis">*indicates required field</small>
-      </v-card-text>
-
-      <v-divider></v-divider>
-
-      <v-card-actions>
-        <v-spacer></v-spacer>
-
-        <v-btn
-            text="Close"
-            variant="plain"
-            @click="dialog = false"
-        ></v-btn>
-
-        <v-btn
-            color="primary"
-            text="Save"
-            variant="tonal"
-            @click="onSaveDialog"
-        ></v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
-
+  </CustomDialog>
 </template>
