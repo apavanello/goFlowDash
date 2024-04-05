@@ -17,7 +17,7 @@ export type NodesExtras = {
     data: NodesData
 }
 
-export type NodesData = {
+export type  NodesData = {
     status: Status
     description: string
     repo: string

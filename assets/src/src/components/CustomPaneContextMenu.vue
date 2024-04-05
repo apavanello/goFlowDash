@@ -44,8 +44,8 @@ function onSaveDialog(data: any) {
     Squad: data.squad,
     StartTime: data.startTime,
     EndTime: data.endTime,
-    PlanedStartTime: data.pStartTime,
-    PlanedEndTime: data.pEndTime,
+    PlanedStartTime: data.planedStartTime,
+    PlanedEndTime: data.planedEndTime,
   } as NewNode
   console.log(newNode)
 

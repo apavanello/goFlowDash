@@ -102,7 +102,6 @@ function refresh() {
                 color="primary"
                 variant="flat"
                 label
-                style="text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;"
             >
               <v-icon icon="mdi-account-multiple" start></v-icon>
               {{ props.data.squad }}
@@ -183,8 +182,8 @@ function refresh() {
       :squad="props.data.squad"
       :startTime="props.data.startTime"
       :endTime="props.data.endTime"
-      :pStartTime="props.data.planedStartTime"
-      :pEndTime="props.data.planedEndTime"
+      :planedStartTime="props.data.planedStartTime"
+      :planedEndTime="props.data.planedEndTime"
 
 
       @onSaveDialog="onSaveDialog"

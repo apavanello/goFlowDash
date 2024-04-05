@@ -15,8 +15,8 @@ const props = defineProps({
   squad: String,
   startTime: String,
   endTime: String,
-  pStartTime: String,
-  pEndTime: String
+  planedStartTime: String,
+  planedEndTime: String
 
 })
 
@@ -26,8 +26,8 @@ let repo = ref(props.repo)
 let squad = ref(props.squad)
 let startTime = ref(props.startTime)
 let endTime = ref(props.endTime)
-let pStartTime = ref(props.pStartTime)
-let pEndTime = ref(props.pEndTime)
+let planedStartTime = ref(props.planedStartTime)
+let planedEndTime = ref(props.planedEndTime)
 
 
 label.value = props.label
@@ -36,8 +36,8 @@ repo.value = props.repo
 squad.value = props.squad
 startTime.value = props.startTime
 endTime.value = props.endTime
-pStartTime.value = props.pStartTime
-pEndTime.value = props.pEndTime
+planedStartTime.value = props.planedStartTime
+planedEndTime.value = props.planedEndTime
 
 
 
@@ -123,7 +123,7 @@ defineEmits(['onSaveDialog', 'onCloseDialog'])
           >
             <v-text-field
                 label="Planed Start"
-                v-model="pStartTime"
+                v-model="planedStartTime"
                 v-maska:[options]
             ></v-text-field>
           </v-col>
@@ -133,7 +133,7 @@ defineEmits(['onSaveDialog', 'onCloseDialog'])
           >
             <v-text-field
                 label="Planed End"
-                v-model="pEndTime"
+                v-model="planedEndTime"
                 v-maska:[options]
             ></v-text-field>
           </v-col>
@@ -157,7 +157,7 @@ defineEmits(['onSaveDialog', 'onCloseDialog'])
             color="primary"
             text="Save"
             variant="tonal"
-            @click="$emit('onSaveDialog', {label, description, repo, squad, startTime, endTime, pStartTime, pEndTime})"
+            @click="$emit('onSaveDialog', {label, description, repo, squad, startTime, endTime, planedStartTime, planedEndTime})"
         ></v-btn>
       </v-card-actions>
     </v-card>
